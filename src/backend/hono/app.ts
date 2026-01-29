@@ -16,17 +16,18 @@ export const createHonoApp = () => {
   }
 
   const app = new Hono<AppEnv>();
+  const api = new Hono<AppEnv>();
 
-  app.use("*", errorBoundary());
-  app.use("*", withAppContext());
-  app.use("*", withSupabase());
+  api.use("*", errorBoundary());
+  api.use("*", withAppContext());
+  api.use("*", withSupabase());
 
-  registerExampleRoutes(app);
-  registerCampaignRoutes(app);
-  registerUserRoutes(app);
-  registerApplicationRoutes(app);
+  registerExampleRoutes(api);
+  registerCampaignRoutes(api);
+  registerUserRoutes(api);
+  registerApplicationRoutes(api);
 
-  app.notFound((c) => {
+  api.notFound((c) => {
     return c.json(
       {
         error: {
@@ -37,6 +38,8 @@ export const createHonoApp = () => {
       404
     );
   });
+
+  app.route("/api", api);
 
   if (process.env.NODE_ENV === "production") {
     singletonApp = app;

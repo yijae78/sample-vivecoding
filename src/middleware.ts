@@ -1,71 +1,30 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import type { Database } from "@/lib/supabase/types";
-import { env } from "@/constants/env";
-import {
-  LOGIN_PATH,
-  isAuthEntryPath,
-  shouldProtectPath,
-} from "@/constants/auth";
-import { match } from "ts-pattern";
+import { LOGIN_PATH, shouldProtectPath } from "@/constants/auth";
 
-const copyCookies = (from: NextResponse, to: NextResponse) => {
-  from.cookies.getAll().forEach((cookie) => {
-    to.cookies.set({
-      name: cookie.name,
-      value: cookie.value,
-      path: cookie.path,
-      expires: cookie.expires,
-      httpOnly: cookie.httpOnly,
-      maxAge: cookie.maxAge,
-      sameSite: cookie.sameSite,
-      secure: cookie.secure,
-    });
-  });
-
-  return to;
-};
+/**
+ * Edge에서 Supabase 클라이언트(process.version 사용)를 쓰지 않고,
+ * Supabase Auth 쿠키 존재 여부만 검사합니다.
+ * 쿠키 이름 패턴: sb-<project-ref>-auth-token
+ */
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  const cookies = request.cookies.getAll();
+  return cookies.some(
+    (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token") && c.value?.length > 0
+  );
+}
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({ request });
+  const isProtected = shouldProtectPath(request.nextUrl.pathname);
+  const hasAuth = hasSupabaseAuthCookie(request);
 
-  const supabase = createServerClient<Database>(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set({ name, value, ...options });
-            response.cookies.set({ name, value, ...options });
-          });
-        },
-      },
-    }
-  );
+  if (isProtected && !hasAuth) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = LOGIN_PATH;
+    loginUrl.searchParams.set("redirectedFrom", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const decision = match({ user, pathname: request.nextUrl.pathname })
-    .when(
-      ({ user: currentUser, pathname }) =>
-        !currentUser && shouldProtectPath(pathname),
-      ({ pathname }) => {
-        const loginUrl = request.nextUrl.clone();
-        loginUrl.pathname = LOGIN_PATH;
-        loginUrl.searchParams.set("redirectedFrom", pathname);
-
-        return copyCookies(response, NextResponse.redirect(loginUrl));
-      }
-    )
-    .otherwise(() => response);
-
-  return decision;
+  return NextResponse.next({ request });
 }
 
 export const config = {
