@@ -9,10 +9,6 @@ import {
   type ApplicationServiceError,
 } from '@/features/application/backend/error';
 import type { ApplicationCreateInput } from '@/features/application/backend/schema';
-import {
-  applicationErrorCodes,
-  type ApplicationServiceError,
-} from '@/features/application/backend/error';
 
 const APPLICATIONS_TABLE = 'applications';
 const CAMPAIGNS_TABLE = 'campaigns';
