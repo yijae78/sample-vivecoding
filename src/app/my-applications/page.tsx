@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
@@ -108,8 +107,12 @@ export default function MyApplicationsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {applications.map((application) => (
-              <ApplicationCard key={application.id} applicationId={application.campaignId} application={application} />
+            {applications.map((application, index) => (
+              <ApplicationCard
+                key={application.id ?? index}
+                applicationId={application.campaignId ?? ""}
+                application={application}
+              />
             ))}
           </div>
         )}
@@ -118,21 +121,31 @@ export default function MyApplicationsPage() {
   );
 }
 
+type ApplicationCardData = {
+  id?: string;
+  campaignId?: string;
+  influencerId?: string;
+  message?: string;
+  plannedVisitDate?: string;
+  status?: "pending" | "selected" | "rejected" | "completed";
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 function ApplicationCard({
   applicationId,
   application,
 }: {
   applicationId: string;
-  application: {
-    status: "pending" | "selected" | "rejected" | "completed";
-    message: string;
-    plannedVisitDate: string;
-    createdAt: string;
-  };
+  application: ApplicationCardData;
 }) {
   const { data: campaign } = useCampaignQuery(applicationId);
-  const status = statusConfig[application.status];
+  const statusKey = application.status ?? "pending";
+  const status = statusConfig[statusKey];
   const StatusIcon = status.icon;
+  const message = application.message ?? "";
+  const plannedVisitDate = application.plannedVisitDate ?? "";
+  const createdAt = application.createdAt ?? "";
 
   return (
     <Link
@@ -160,7 +173,7 @@ function ApplicationCard({
           )}
 
           <p className="mb-3 line-clamp-2 text-sm text-slate-300">
-            {application.message}
+            {message}
           </p>
 
           <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -168,16 +181,16 @@ function ApplicationCard({
               <Calendar className="h-3 w-3" />
               <span>
                 방문 예정:{" "}
-                {format(new Date(application.plannedVisitDate), "yyyy년 M월 d일", {
-                  locale: ko,
-                })}
+                {plannedVisitDate
+                  ? format(new Date(plannedVisitDate), "yyyy년 M월 d일", { locale: ko })
+                  : "-"}
               </span>
             </div>
             <span>
               지원일:{" "}
-              {format(new Date(application.createdAt), "yyyy년 M월 d일", {
-                locale: ko,
-              })}
+              {createdAt
+                ? format(new Date(createdAt), "yyyy년 M월 d일", { locale: ko })
+                : "-"}
             </span>
           </div>
         </div>
