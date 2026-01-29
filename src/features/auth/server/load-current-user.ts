@@ -13,6 +13,9 @@ const mapUser = (user: User) => ({
 
 export const loadCurrentUser = async (): Promise<CurrentUserSnapshot> => {
   const supabase = await createSupabaseServerClient();
+  if (!supabase) {
+    return { status: "unauthenticated", user: null };
+  }
   const result = await supabase.auth.getUser();
   const user = result.data.user;
 

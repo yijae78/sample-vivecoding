@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { validateMinimumAge, MINIMUM_INFLUENCER_AGE as MINIMUM_INFLUENCER_AGE_CONST } from '@/lib/validation/age';
-import { validateChannelUrl, checkDuplicateChannels, type ChannelType } from '@/lib/validation/channel';
+import { validateChannelUrl, checkDuplicateChannels, type ChannelType, type ChannelInput } from '@/lib/validation/channel';
 
 // 회원가입 스키마
 export const SignupSchema = z.object({
@@ -39,21 +39,18 @@ export const InfluencerOnboardingSchema = z.object({
       message: '만 14세 이상만 가입 가능합니다.',
     }),
   channels: z.array(
-    z.object({
-      channelType: z.enum(['naver', 'youtube', 'instagram', 'threads']),
-      channelName: z.string().min(1, '채널명을 입력해주세요.'),
-      channelUrl: z.string()
-        .url('올바른 URL을 입력해주세요.')
-        .refine((url, ctx) => {
-          const channelType = ctx.parent.channelType as ChannelType;
-          return validateChannelUrl(channelType, url);
-        }, {
-          message: '채널 유형에 맞는 URL을 입력해주세요.',
-        }),
-    })
+    z
+      .object({
+        channelType: z.enum(['naver', 'youtube', 'instagram', 'threads']),
+        channelName: z.string().min(1, '채널명을 입력해주세요.'),
+        channelUrl: z.string().url('올바른 URL을 입력해주세요.'),
+      })
+      .refine((channel) => validateChannelUrl(channel.channelType as ChannelType, channel.channelUrl), {
+        message: '채널 유형에 맞는 URL을 입력해주세요.',
+      })
   )
     .min(1, '최소 1개 이상의 SNS 채널을 등록해주세요.')
-    .refine((channels) => !checkDuplicateChannels(channels), {
+    .refine((channels) => !checkDuplicateChannels(channels as ChannelInput[]), {
       message: '동일한 채널 유형을 중복으로 등록할 수 없습니다.',
     }),
 });

@@ -8,10 +8,9 @@ import {
   InfluencerOnboardingSchema,
   CHANNEL_TYPE_LABELS,
   type InfluencerOnboardingInput,
-  type ChannelType,
 } from "@/features/user/backend/schema";
 import { validateMinimumAge, MINIMUM_INFLUENCER_AGE } from "@/lib/validation/age";
-import { validateChannelUrl as validateChannelUrlPattern, checkDuplicateChannels, type ChannelInput } from "@/lib/validation/channel";
+import { validateChannelUrl as validateChannelUrlPattern, checkDuplicateChannels, type ChannelInput, type ChannelType } from "@/lib/validation/channel";
 
 interface InfluencerOnboardingFormProps {
   onSuccess?: () => void;
@@ -75,7 +74,7 @@ export function InfluencerOnboardingForm({ onSuccess }: InfluencerOnboardingForm
   }, []);
 
   const checkDuplicate = useCallback(() => {
-    if (checkDuplicateChannels(formState.channels)) {
+    if (checkDuplicateChannels(formState.channels as ChannelInput[])) {
       setErrors((prev) => ({
         ...prev,
         channels: '동일한 채널 유형을 중복으로 등록할 수 없습니다.',
@@ -93,7 +92,7 @@ export function InfluencerOnboardingForm({ onSuccess }: InfluencerOnboardingForm
     ];
     setFormState((prev) => ({ ...prev, channels: newChannels }));
     
-    if (checkDuplicateChannels(newChannels)) {
+    if (checkDuplicateChannels(newChannels as ChannelInput[])) {
       setErrors((prev) => ({
         ...prev,
         channels: '동일한 채널 유형을 중복으로 등록할 수 없습니다.',
@@ -107,7 +106,7 @@ export function InfluencerOnboardingForm({ onSuccess }: InfluencerOnboardingForm
     const newChannels = formState.channels.filter((_, i) => i !== index);
     setFormState((prev) => ({ ...prev, channels: newChannels }));
     
-    if (newChannels.length > 0 && checkDuplicateChannels(newChannels)) {
+    if (newChannels.length > 0 && checkDuplicateChannels(newChannels as ChannelInput[])) {
       setErrors((prev) => ({
         ...prev,
         channels: '동일한 채널 유형을 중복으로 등록할 수 없습니다.',
@@ -133,7 +132,7 @@ export function InfluencerOnboardingForm({ onSuccess }: InfluencerOnboardingForm
         }
       }
 
-      if (checkDuplicateChannels(newChannels)) {
+      if (checkDuplicateChannels(newChannels as ChannelInput[])) {
         setErrors((prev) => ({
           ...prev,
           channels: '동일한 채널 유형을 중복으로 등록할 수 없습니다.',

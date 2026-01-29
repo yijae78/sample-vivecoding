@@ -2,13 +2,15 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { getAppConfig } from "@/backend/config";
 
 export async function createClient() {
+  const config = getAppConfig();
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    config.supabase.url,
+    config.supabase.serviceRoleKey,
     {
       cookies: {
         getAll() {
@@ -31,9 +33,10 @@ export async function createClient() {
 }
 
 export async function createPureClient() {
+  const config = getAppConfig();
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    config.supabase.url,
+    config.supabase.serviceRoleKey,
     {
       cookies: {
         getAll() {

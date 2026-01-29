@@ -14,12 +14,21 @@ const logger: AppLogger = {
 };
 
 export const withAppContext = () => {
-  const config = getAppConfig();
-
   return createMiddleware<AppEnv>(async (c, next) => {
     c.set(contextKeys.logger, logger);
-    c.set(contextKeys.config, config);
-
-    await next();
+    try {
+      const config = getAppConfig();
+      c.set(contextKeys.config, config);
+      await next();
+    } catch {
+      return c.json(
+        {
+          error: "Service unavailable",
+          message:
+            "Backend configuration missing. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+        },
+        503
+      );
+    }
   });
 };
