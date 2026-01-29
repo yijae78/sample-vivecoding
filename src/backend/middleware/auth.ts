@@ -1,7 +1,5 @@
 import { createMiddleware } from 'hono/factory';
-import type { AppEnv, AppContext } from '@/backend/hono/context';
-
-const USER_ID_KEY = 'userId';
+import { contextKeys, type AppEnv, type AppContext } from '@/backend/hono/context';
 
 // 인증 미들웨어 - 요청 헤더나 쿠키에서 사용자 ID 추출
 // 실제 구현은 Next.js Route Handler에서 쿠키를 읽어서 처리
@@ -26,10 +24,10 @@ export const withAuth = () =>
       // 본문이 없거나 파싱 실패 시 무시
     }
 
-    c.set(USER_ID_KEY, userId);
+    c.set(contextKeys.userId, userId);
     await next();
   });
 
 export const getCurrentUserId = (c: AppContext): string | undefined => {
-  return c.get(USER_ID_KEY) as string | undefined;
+  return c.get(contextKeys.userId) as string | undefined;
 };
