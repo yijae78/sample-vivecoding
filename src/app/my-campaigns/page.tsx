@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, Calendar, Users, Edit, Eye } from "lucide-react";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import { useApplicationsQuery } from "@/features/application/hooks/useApplicationsQuery";
 import { useCampaignsQuery } from "@/features/campaign/hooks/useCampaignsQuery";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
