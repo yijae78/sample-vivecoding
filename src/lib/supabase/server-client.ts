@@ -44,5 +44,5 @@ export const createSupabaseServerClient = async (): Promise<
         },
       },
     }
-  );
+  ) as unknown as SupabaseClient<Database>;
 };
