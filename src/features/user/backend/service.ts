@@ -25,27 +25,30 @@ export const createUserProfile = async (
   userId: string,
   input: SignupInput,
 ): Promise<HandlerResult<{ userId: string }, UserServiceError, unknown>> => {
-  // users 테이블에 프로필 생성
+  // users 테이블에 프로필 생성 (이미 있으면 업데이트 - 재가입/재시도 시 users_pkey 중복 방지)
   const { error: userError } = await client
     .from(USERS_TABLE)
-    .insert({
-      id: userId,
-      name: input.name,
-      phone: input.phone,
-      email: input.email,
-    });
+    .upsert(
+      {
+        id: userId,
+        name: input.name,
+        phone: input.phone,
+        email: input.email,
+      },
+      { onConflict: 'id' }
+    );
 
   if (userError) {
     return failure(500, userErrorCodes.createError, userError.message);
   }
 
-  // user_roles 테이블에 역할 저장
+  // user_roles 테이블에 역할 저장 (이미 있으면 무시 - 재가입 시 중복 방지)
   const { error: roleError } = await client
     .from(USER_ROLES_TABLE)
-    .insert({
-      user_id: userId,
-      role: input.role,
-    });
+    .upsert(
+      { user_id: userId, role: input.role },
+      { onConflict: 'user_id,role' }
+    );
 
   if (roleError) {
     return failure(500, userErrorCodes.createError, roleError.message);
