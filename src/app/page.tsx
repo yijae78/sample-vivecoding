@@ -33,6 +33,12 @@ export default function Home() {
       <span className="hidden truncate sm:inline">{user.email ?? "알 수 없는 사용자"}</span>
       <div className="flex items-center gap-2">
         <Link
+          href="/my-campaigns"
+          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-700 transition hover:bg-slate-50"
+        >
+          내 체험단
+        </Link>
+        <Link
           href="/dashboard"
           className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-700 transition hover:bg-slate-50"
         >

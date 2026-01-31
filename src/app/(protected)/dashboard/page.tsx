@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 type DashboardPageProps = {
@@ -19,6 +20,26 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           {user?.email ?? "알 수 없는 사용자"} 님, 환영합니다.
         </p>
       </header>
+      <section className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/my-campaigns"
+          className="rounded-xl border border-slate-200 p-5 transition hover:border-slate-300 hover:bg-slate-50"
+        >
+          <h2 className="text-lg font-medium text-slate-800">내 체험단 관리</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            체험단을 등록하고 지원자를 관리하세요.
+          </p>
+        </Link>
+        <Link
+          href="/my-applications"
+          className="rounded-xl border border-slate-200 p-5 transition hover:border-slate-300 hover:bg-slate-50"
+        >
+          <h2 className="text-lg font-medium text-slate-800">내 지원 현황</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            지원한 체험단 목록과 진행 상황을 확인하세요.
+          </p>
+        </Link>
+      </section>
       <div className="overflow-hidden rounded-xl border border-slate-200">
         <Image
           alt="대시보드"
